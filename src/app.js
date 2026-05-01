@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const productsRouter = require("./routes/products");
-const ordersRouter = require("./routes/orders");
 const analyticsRouter = require("./routes/analytics");
 
 const app = express();
@@ -14,7 +13,6 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api/products", productsRouter);
-app.use("/api/orders", ordersRouter);
 app.use("/api/analytics", analyticsRouter);
 
 app.use((err, req, res, next) => {
