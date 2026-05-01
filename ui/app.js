@@ -237,13 +237,13 @@ const salesByDay = async () => {
   const data = await request(`/api/analytics/sales-by-day${query ? `?${query}` : ""}`);
   analyticsResult.textContent = pretty(data);
   renderTrendChart(
-    data.map((row) => ({ label: row._id, value: row.totalValue })),
+    data.map((row) => ({ label: row._id, value: row.products })),
     "label",
     "value",
     {
-      title: "Stock Value by Day",
+      title: "Products Added by Day",
       xLabel: "Date",
-      yLabel: "INR"
+      yLabel: "Products"
     }
   );
 };
@@ -252,6 +252,16 @@ const topProducts = async () => {
   const limit = analyticsFields.limit.value || 10;
   const data = await request(`/api/analytics/top-products?limit=${limit}`);
   analyticsResult.textContent = pretty(data);
+  renderTrendChart(
+    data.map((row) => ({ label: row.name, value: row.totalValue })),
+    "label",
+    "value",
+    {
+      title: "Top Products by Stock Value",
+      xLabel: "Product",
+      yLabel: "INR"
+    }
+  );
 };
 
 const revenueTrend = async () => {
