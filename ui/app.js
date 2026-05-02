@@ -79,6 +79,8 @@ const drawBarChart = (labels, values, options = {}) => {
   // Y-axis ticks
   chartCtx.fillStyle = "#6b7280";
   chartCtx.font = "10px Segoe UI, sans-serif";
+  chartCtx.textAlign = "right";
+  chartCtx.textBaseline = "middle";
   const ticks = 4;
   const step = Math.max(1, Math.ceil(maxValue / ticks));
   const yAxisMax = step * ticks;
@@ -90,31 +92,45 @@ const drawBarChart = (labels, values, options = {}) => {
     chartCtx.moveTo(left, y);
     chartCtx.lineTo(width - padding, y);
     chartCtx.stroke();
-    chartCtx.fillText(String(value), 6, y + 3);
+    chartCtx.fillText(String(value), left - 6, y);
   }
 
   values.forEach((value, index) => {
     const barHeight = (value / yAxisMax) * chartHeight;
-    const x = left + index * barWidth + 8;
+    const innerWidth = Math.max(barWidth - 16, 6);
+    const x = left + index * barWidth + (barWidth - innerWidth) / 2;
     const y = bottom - barHeight;
 
     chartCtx.fillStyle = "#2563eb";
-    chartCtx.fillRect(x, y, Math.max(barWidth - 16, 6), barHeight);
+    chartCtx.fillRect(x, y, innerWidth, barHeight);
   });
 
   // X labels
   chartCtx.fillStyle = "#6b7280";
+  chartCtx.textAlign = "center";
+  chartCtx.textBaseline = "top";
   labels.forEach((label, index) => {
-    const x = left + index * barWidth + 8;
-    chartCtx.fillText(label, x, bottom + 14);
+    const x = left + index * barWidth + barWidth / 2;
+    chartCtx.fillText(label, x, bottom + 10);
   });
 
   // Title and axis labels
   chartCtx.fillStyle = "#111827";
   chartCtx.font = "12px Segoe UI, sans-serif";
-  if (title) chartCtx.fillText(title, left, padding - 8);
-  if (xLabel) chartCtx.fillText(xLabel, width - padding - 80, height - 6);
-  if (yLabel) chartCtx.fillText(yLabel, 6, padding - 8);
+  chartCtx.textAlign = "center";
+  chartCtx.textBaseline = "bottom";
+  if (title) chartCtx.fillText(title, left + chartWidth / 2, padding - 6);
+  chartCtx.textBaseline = "top";
+  if (xLabel) chartCtx.fillText(xLabel, left + chartWidth / 2, height - padding + 6);
+  if (yLabel) {
+    chartCtx.save();
+    chartCtx.translate(left - 24, top + chartHeight / 2);
+    chartCtx.rotate(-Math.PI / 2);
+    chartCtx.textAlign = "center";
+    chartCtx.textBaseline = "top";
+    chartCtx.fillText(yLabel, 0, 0);
+    chartCtx.restore();
+  }
 };
 
 const renderTrendChart = (rows, labelKey, valueKey, options) => {
@@ -241,7 +257,7 @@ const salesByDay = async () => {
     "label",
     "value",
     {
-      title: "Products Added by Day",
+      title: "Products Sold by Day",
       xLabel: "Date",
       yLabel: "Qty"
     }
@@ -256,7 +272,7 @@ const topProducts = async () => {
     "label",
     "value",
     {
-      title: "Top Products by Stock Value",
+      title: "Top Sales till Date",
       xLabel: "Product",
       yLabel: "INR"
     }
@@ -273,7 +289,7 @@ const revenueTrend = async () => {
     "label",
     "value",
     {
-      title: "Stock Value by Month",
+      title: "Sales per Month",
       xLabel: "Month",
       yLabel: "INR"
     }
