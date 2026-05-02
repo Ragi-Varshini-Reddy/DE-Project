@@ -8,7 +8,6 @@ const productFields = {
 };
 
 const productsContainer = document.querySelector("#products");
-const analyticsResult = document.querySelector("#analyticsResult");
 
 const analyticsFields = {
   start: document.querySelector("#analyticsStart"),
@@ -81,8 +80,10 @@ const drawBarChart = (labels, values, options = {}) => {
   chartCtx.fillStyle = "#6b7280";
   chartCtx.font = "10px Segoe UI, sans-serif";
   const ticks = 4;
+  const step = Math.max(1, Math.ceil(maxValue / ticks));
+  const yAxisMax = step * ticks;
   for (let i = 0; i <= ticks; i += 1) {
-    const value = Math.round((maxValue / ticks) * i);
+    const value = step * i;
     const y = bottom - (chartHeight / ticks) * i;
     chartCtx.strokeStyle = "#f3f4f6";
     chartCtx.beginPath();
@@ -93,7 +94,7 @@ const drawBarChart = (labels, values, options = {}) => {
   }
 
   values.forEach((value, index) => {
-    const barHeight = (value / maxValue) * chartHeight;
+    const barHeight = (value / yAxisMax) * chartHeight;
     const x = left + index * barWidth + 8;
     const y = bottom - barHeight;
 
@@ -235,15 +236,14 @@ const analyticsQuery = () => {
 const salesByDay = async () => {
   const query = analyticsQuery();
   const data = await request(`/api/analytics/sales-by-day${query ? `?${query}` : ""}`);
-  analyticsResult.textContent = pretty(data);
   renderTrendChart(
-    data.map((row) => ({ label: row._id, value: row.products })),
+    data.map((row) => ({ label: row._id, value: row.totalQuantity })),
     "label",
     "value",
     {
       title: "Products Added by Day",
       xLabel: "Date",
-      yLabel: "Products"
+      yLabel: "Qty"
     }
   );
 };
@@ -251,7 +251,6 @@ const salesByDay = async () => {
 const topProducts = async () => {
   const limit = analyticsFields.limit.value || 10;
   const data = await request(`/api/analytics/top-products?limit=${limit}`);
-  analyticsResult.textContent = pretty(data);
   renderTrendChart(
     data.map((row) => ({ label: row.name, value: row.totalValue })),
     "label",
@@ -266,7 +265,6 @@ const topProducts = async () => {
 
 const revenueTrend = async () => {
   const data = await request("/api/analytics/revenue-trend");
-  analyticsResult.textContent = pretty(data);
   renderTrendChart(
     data.map((row) => ({
       label: `${row._id.year}-${String(row._id.month).padStart(2, "0")}`,
